@@ -14,10 +14,10 @@ type CustomLogger = {
  * Create a new winston logger with given module
  * @param callingModule the module to create a logger for
  */
-export const createLogger = (callingModule: NodeModule): CustomLogger => {
+export const createCustomLogger = (callingModule: NodeModule): CustomLogger => {
   const label = getModuleLabel(callingModule)
   loggers.add(label, createLoggerOptions(label))
-  return createCustomLogger(loggers.get(label))
+  return enforceLoggingShape(loggers.get(label))
 }
 
 /**
@@ -77,7 +77,7 @@ type CustomLoggerParams = {
  * log format.
  * @param logger the logger to override
  */
-const createCustomLogger = (logger: Logger): CustomLogger => {
+const enforceLoggingShape = (logger: Logger): CustomLogger => {
   return {
     info: (params: Omit<CustomLoggerParams, 'error'>) => {
       const { message, meta } = params

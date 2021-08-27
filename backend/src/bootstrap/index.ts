@@ -18,8 +18,11 @@ import { AuthController, AuthService } from '../auth'
 
 import mailer from './mailer'
 import helmetOptions from './helmet'
+import { createCustomLogger } from './logging'
 
 type DatabaseConfigType = { [n in NodeEnv]: SequelizeOptions }
+
+const logger = createCustomLogger(module)
 
 const step = config.get('otpExpiry') / 2
 
@@ -40,11 +43,12 @@ export async function bootstrap(): Promise<{
 }> {
   // Create Sequelize instance and add models
   const nodeEnv = config.get('nodeEnv')
-  const options = (sequelizeConfig as DatabaseConfigType)[
-    nodeEnv
-  ]
+  const options = (sequelizeConfig as DatabaseConfigType)[nodeEnv]
 
-  console.log('Creating Sequelize instance and adding models')
+  logger.info({
+    message: 'Creating Sequelize instance and adding models',
+    meta: { function: 'bootstrap' },
+  })
   const sequelize = new Sequelize(options)
   sequelize.addModels([User])
 
@@ -90,7 +94,12 @@ export async function bootstrap(): Promise<{
   const apiMiddleware = [sessionMiddleware, express.json()]
   app.use('/api/v1', apiMiddleware, api({ auth }))
 
-  console.log('Connecting to Sequelize')
+  logger.info({
+    message: 'Connecting to Sequelize',
+    meta: {
+      function: 'bootstrap',
+    },
+  })
   await sequelize.authenticate()
   return { app, sequelize }
 }

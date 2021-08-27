@@ -1,2 +1,2 @@
 export { requestLoggingMiddleware } from './request-logging'
-export { createLogger } from './app-logging'
+export { createCustomLogger } from './app-logging'
