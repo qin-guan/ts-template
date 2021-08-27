@@ -9,16 +9,17 @@ import { Sequelize as OriginSequelize } from 'sequelize'
 import SequelizeStoreFactory from 'connect-session-sequelize'
 
 // Sequelize-related imports
-import { databaseConfigType, nodeEnvType } from '../types/sequelize-config'
 import * as sequelizeConfig from '../database/config/config'
 import { User } from '../database/models/User'
 
-import config from '../config'
+import config, { NodeEnv } from '../config'
 import api from '../api'
 import { AuthController, AuthService } from '../auth'
 
 import mailer from './mailer'
 import helmetOptions from './helmet'
+
+type DatabaseConfigType = { [n in NodeEnv]: SequelizeOptions }
 
 const step = config.get('otpExpiry') / 2
 
@@ -38,8 +39,8 @@ export async function bootstrap(): Promise<{
   sequelize: Sequelize
 }> {
   // Create Sequelize instance and add models
-  const nodeEnv = config.get('nodeEnv') as nodeEnvType
-  const options: SequelizeOptions = (sequelizeConfig as databaseConfigType)[
+  const nodeEnv = config.get('nodeEnv')
+  const options = (sequelizeConfig as DatabaseConfigType)[
     nodeEnv
   ]
 
@@ -60,7 +61,7 @@ export async function bootstrap(): Promise<{
 
   const SequelizeStore = SequelizeStoreFactory(session.Store)
 
-  const secure = ['production', 'staging'].includes(config.get('nodeEnv'))
+  const secure = [NodeEnv.Prod, NodeEnv.Staging].includes(nodeEnv)
 
   const sessionMiddleware = session({
     store: new SequelizeStore({

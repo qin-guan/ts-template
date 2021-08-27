@@ -4,6 +4,13 @@
  */
 import convict from 'convict'
 
+export enum NodeEnv {
+  Prod = 'production',
+  Staging = 'staging',
+  Dev = 'development',
+  Test = 'test',
+}
+
 /**
  * To require an env var without setting a default,
  * use
@@ -43,8 +50,8 @@ const config = convict({
   nodeEnv: {
     doc: 'The environment that NodeJS is running',
     env: 'NODE_ENV',
-    format: '*',
-    default: 'development',
+    format: Object.values(NodeEnv),
+    default: NodeEnv.Dev,
   },
   cookieMaxAge: {
     doc: 'The maximum age for a cookie, expressed in ms',
